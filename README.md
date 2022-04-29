@@ -6,7 +6,7 @@
 
 ### 流程图
 
-![image](https://github.com/cloudGrin/maicai_xstate_rxjs/IMG/maicai_xstate.png)
+![image](https://github.com/cloudGrin/maicai_xstate_rxjs/blob/main/IMG/maicai_xstate.png)
 
 ### 运行测试代码
 
