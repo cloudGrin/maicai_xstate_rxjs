@@ -2,27 +2,31 @@
   "name": "maicai_xstate_rxjs",
   "version": "1.0.0",
   "description": "",
-  "main": "main.ts",
   "scripts": {
-    "dev": "ts-node main.ts"
+    "xstate": "ts-node xstate.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "inquirer": "^8.2.2",
+    "inquirer": "^8.2.4",
     "node-fetch": "2",
-    "typescript": "^4.6.3",
+    "rxjs": "^7.5.5",
+    "typescript": "^4.6.4",
     "xstate": "^4.31.0"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.1",
-    "@typescript-eslint/eslint-plugin": "^5.20.0",
-    "@typescript-eslint/parser": "^5.20.0",
-    "eslint": "^8.13.0",
+    "@typescript-eslint/eslint-plugin": "^5.22.0",
+    "@typescript-eslint/parser": "^5.22.0",
+    "eslint": "^8.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-rxjs": "^5.0.2",
+    "eslint-plugin-unicorn": "^42.0.0",
     "prettier": "^2.6.2",
     "ts-node": "^10.7.0"
   }

@@ -1,6 +1,7 @@
 import { assign, createMachine, interpret, send } from 'xstate'
 import type { IConfig } from './service'
 import { getAddress, getCart, getConfig, getDeliveryTime, postOrder } from './service'
+
 interface Context {
   config: IConfig
   /**
@@ -228,7 +229,11 @@ const mainMachine = createMachine<Context, FetchEvent>(
             invoke: {
               id: 'postOrder',
               src: (context) => {
-                return postOrder({ cookie: context.config.cookie, prodList: context.cartData?.prodList!, time: context.deliveryTime?.timeList[0]! }).catch((err) => {
+                return postOrder({
+                  cookie: context.config.cookie,
+                  prodList: context.cartData?.prodList!,
+                  time: context.deliveryTime?.timeList[0]!
+                }).catch((err) => {
                   console.log(err)
                   return Promise.reject(err)
                 })

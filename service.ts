@@ -1,6 +1,5 @@
-import { commonHeader } from './const'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { prompt } from 'inquirer'
-import fetch from 'node-fetch'
 
 export interface IConfig {
   /**
@@ -85,7 +84,11 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
         resolve({ code: -2, message: '接口正忙，请稍后重试' })
       } else {
         // success
-        resolve({ code: 0, data: randomNum > 0.1 ? { valid_address: [generateAddress()] } : { valid_address: [] }, message: 'success' })
+        resolve({
+          code: 0,
+          data: randomNum > 0.1 ? { valid_address: [generateAddress()] } : { valid_address: [] },
+          message: 'success'
+        })
       }
     })
   }
@@ -101,14 +104,16 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
         type: 'list',
         name: 'address',
         message: '请选择地址',
-        choices: data!.valid_address.map((info) => ({ value: info, name: `${info.location.address} ${info.location.name} ${info.addr_detail}` }))
-      })
-    } else {
-      return Promise.reject({
-        code: code === 0 ? -3 : code,
-        message: code === 0 ? (data?.valid_address?.length ?? 0) === 0 && '无可用地址' : message
+        choices: data!.valid_address.map((info) => ({
+          value: info,
+          name: `${info.location.address} ${info.location.name} ${info.addr_detail}`
+        }))
       })
     }
+    return Promise.reject({
+      code: code === 0 ? -3 : code,
+      message: code === 0 ? (data?.valid_address?.length ?? 0) === 0 && '无可用地址' : message
+    })
   })
 }
 
@@ -138,7 +143,11 @@ export function getCart({ cookie }: { cookie: string }): Promise<any> {
         resolve({ code: -2, message: '接口正忙，请稍后重试' })
       } else {
         // success
-        resolve({ code: 0, data: randomNum > 0.05 ? { prodList: [generateProd()] } : { prodList: [] }, message: 'success' })
+        resolve({
+          code: 0,
+          data: randomNum > 0.05 ? { prodList: [generateProd()] } : { prodList: [] },
+          message: 'success'
+        })
       }
     })
   }
@@ -147,12 +156,11 @@ export function getCart({ cookie }: { cookie: string }): Promise<any> {
     const prodListLength = data?.prodList?.length ?? 0
     if (code === 0 && prodListLength > 0) {
       return data
-    } else {
-      return Promise.reject({
-        code: code === 0 ? -3 : code,
-        message: code === 0 ? (data?.prodList?.length ?? 0) === 0 && '购物车无商品' : message
-      })
     }
+    return Promise.reject({
+      code: code === 0 ? -3 : code,
+      message: code === 0 ? (data?.prodList?.length ?? 0) === 0 && '购物车无商品' : message
+    })
   })
 }
 
@@ -210,12 +218,11 @@ export function getDeliveryTime({ cookie }: { cookie: string }): Promise<any> {
     const prodListLength = data?.timeList?.length ?? 0
     if (code === 0 && prodListLength > 0) {
       return data
-    } else {
-      return Promise.reject({
-        code: code === 0 ? -3 : code,
-        message: code === 0 ? (data?.timeList?.length ?? 0) === 0 && '无可配送时间' : message
-      })
     }
+    return Promise.reject({
+      code: code === 0 ? -3 : code,
+      message: code === 0 ? (data?.timeList?.length ?? 0) === 0 && '无可配送时间' : message
+    })
   })
 }
 
@@ -262,11 +269,10 @@ export function postOrder({
     const { code, message } = res
     if (code === 0) {
       return true
-    } else {
-      return Promise.reject({
-        code,
-        message
-      })
     }
+    return Promise.reject({
+      code,
+      message
+    })
   })
 }

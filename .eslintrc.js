@@ -3,15 +3,15 @@ module.exports = {
     browser: true,
     es2021: true
   },
-  extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
-
+  ignorePatterns: ['.eslintrc.js'],
+  extends: ['airbnb-base', 'airbnb-typescript/base', 'plugin:rxjs/recommended', 'plugin:prettier/recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 13,
     sourceType: 'module',
     project: './tsconfig.json'
   },
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['unicorn', '@typescript-eslint'],
   rules: {
     'no-console': 'off',
     'unicorn/filename-case': [
@@ -26,9 +26,10 @@ module.exports = {
           snakeCase: false,
           // 大驼峰
           pascalCase: false
-        },
+        }
         // ignore: [/.d.ts$/i]
       }
-    ]
+    ],
+    'prefer-promise-reject-errors': 'off'
   }
 }
