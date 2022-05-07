@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { prompt } from 'inquirer'
+import { nanoid } from 'nanoid'
 
 export interface IConfig {
   /**
@@ -13,59 +14,74 @@ export interface IConfig {
   payType: 2 | 4
 }
 
+interface IRes<T = never> {
+  code: number
+  message: string
+  data?: T
+}
+
 /**
  * 获取用户配置
  */
 export function getConfig(): Promise<IConfig> {
-  return Promise.resolve({
-    cookie: '6f891cf2b71ff7f0730ac6c83d52dd92',
-    payType: 2
-  })
-  // return prompt([
-  //   {
-  //     type: 'input',
-  //     name: 'cookie',
-  //     message: '请输入cookie',
-  //     validate(input) {
-  //       return !!input.trim()
-  //     }
-  //   },
-  //   {
-  //     type: 'list',
-  //     name: 'payType',
-  //     message: '请选择支付方式',
-  //     choices: [
-  //       { name: '支付宝', value: '2' },
-  //       { name: '微信', value: '4' }
-  //     ]
-  //   }
-  // ])
+  console.log('🚀 ~ file: service.ts ~ line 20 ~ getConfig ~ getConfig')
+  // return Promise.resolve({
+  //   cookie: nanoid(),
+  //   payType: 2
+  // })
+
+  // return Promise.reject({
+  //   code: -1,
+  //   message: '获取config失败'
+  // })
+
+  return prompt([
+    {
+      type: 'input',
+      name: 'cookie',
+      message: '请输入cookie',
+      validate(input) {
+        return !!input.trim()
+      }
+    },
+    {
+      type: 'list',
+      name: 'payType',
+      message: '请选择支付方式',
+      choices: [
+        { name: '支付宝', value: '2' },
+        { name: '微信', value: '4' }
+      ]
+    }
+  ])
 }
 
+export interface IAddress {
+  station_id: string
+  city_number: string
+  addr_detail: string
+  location: {
+    location: [number, number]
+    address: string
+    name: string
+  }
+  id: string
+}
 /**
  * 获取地址
  */
-export function getAddress({ cookie }: { cookie: string }): Promise<any> {
+export function getAddress({ cookie }: { cookie: string }): Promise<IRes<IAddress>> {
+  console.log('🚀 ~ file: service.ts ~ line 50 ~ getAddress ~ getAddress')
   function api(): Promise<{
     data?: {
-      valid_address: {
-        station_id: string
-        city_number: string
-        addr_detail: string
-        location: {
-          location: [number, number]
-          address: string
-          name: string
-        }
-        id: string
-      }[]
+      valid_address: IAddress[]
     }
     code: number
     message: string
   }> {
     function generateAddress() {
       return {
-        station_id: '1',
+        station_id: nanoid(),
         city_number: '1111',
         addr_detail: '1栋204',
         location: {
@@ -73,10 +89,16 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
           name: '测试街道',
           location: [111.33, 32.11] as [number, number]
         },
-        id: 'sadas23123'
+        id: nanoid()
       }
     }
     return new Promise((resolve, reject) => {
+      // resolve({
+      //   code: 0,
+      //   data: { valid_address: [generateAddress()] },
+      //   message: 'success'
+      // })
+
       const randomNum = Math.random()
       if (randomNum > 0.99) {
         resolve({ code: -1, message: 'token 失效' })
@@ -98,7 +120,7 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
     if (code === 0 && addressLength > 0) {
       if (addressLength === 1) {
         // 一个地址时不需要选择
-        return data!.valid_address[0]
+        return { data: data?.valid_address[0], code, message }
       }
       return prompt({
         type: 'list',
@@ -108,6 +130,8 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
           value: info,
           name: `${info.location.address} ${info.location.name} ${info.addr_detail}`
         }))
+      }).then((res1) => {
+        return { data: res1, code, message }
       })
     }
     return Promise.reject({
@@ -117,13 +141,16 @@ export function getAddress({ cookie }: { cookie: string }): Promise<any> {
   })
 }
 
+export type ProdList = {}[]
+
 /**
  * 获取购物车
  */
-export function getCart({ cookie }: { cookie: string }): Promise<any> {
+export function getCart({ cookie }: { cookie: string }): Promise<IRes<ProdList>> {
+  console.log('🚀 ~ file: service.ts ~ line 126 ~ getCart ~ getCart')
   function api(): Promise<{
     data?: {
-      prodList: {}[]
+      prodList: ProdList
     }
     code: number
     message: string
@@ -131,11 +158,17 @@ export function getCart({ cookie }: { cookie: string }): Promise<any> {
     function generateProd() {
       return {
         name: '香蕉',
-        id: '1',
+        id: nanoid(),
         price: '10.00'
       }
     }
     return new Promise((resolve, reject) => {
+      // resolve({
+      //   code: 0,
+      //   data: { prodList: [generateProd()] },
+      //   message: 'success'
+      // })
+
       const randomNum = Math.random()
       if (randomNum > 0.99) {
         resolve({ code: -1, message: 'token 失效' })
@@ -155,7 +188,11 @@ export function getCart({ cookie }: { cookie: string }): Promise<any> {
     const { data, code, message } = res
     const prodListLength = data?.prodList?.length ?? 0
     if (code === 0 && prodListLength > 0) {
-      return data
+      return {
+        code,
+        message,
+        data: data?.prodList!
+      }
     }
     return Promise.reject({
       code: code === 0 ? -3 : code,
@@ -164,18 +201,41 @@ export function getCart({ cookie }: { cookie: string }): Promise<any> {
   })
 }
 
+export interface ITime {
+  startTime: string
+  endTime: string
+}
+
 /**
  * 获取可配送时间
  */
-export function getDeliveryTime({ cookie }: { cookie: string }): Promise<any> {
+export function getDeliveryTime({ cookie }: { cookie: string }): Promise<IRes<ITime[]>> {
+  console.log('🚀 ~ file: service.ts ~ line 174 ~ getDeliveryTime ~ getDeliveryTime')
   function api(): Promise<{
     data?: {
-      timeList: {}[]
+      timeList: ITime[]
     }
     code: number
     message: string
   }> {
     return new Promise((resolve, reject) => {
+      // resolve({
+      //   code: 0,
+      //   data: {
+      //     timeList: [
+      //       {
+      //         startTime: '09:00',
+      //         endTime: '09:30'
+      //       },
+      //       {
+      //         startTime: '10:00',
+      //         endTime: '10:30'
+      //       }
+      //     ]
+      //   },
+      //   message: 'success'
+      // })
+
       const randomNum = Math.random()
       if (randomNum > 0.99) {
         resolve({ code: -1, message: 'token 失效' })
@@ -217,7 +277,11 @@ export function getDeliveryTime({ cookie }: { cookie: string }): Promise<any> {
     const { data, code, message } = res
     const prodListLength = data?.timeList?.length ?? 0
     if (code === 0 && prodListLength > 0) {
-      return data
+      return {
+        code,
+        message,
+        data: data?.timeList!
+      }
     }
     return Promise.reject({
       code: code === 0 ? -3 : code,
@@ -232,16 +296,15 @@ export function getDeliveryTime({ cookie }: { cookie: string }): Promise<any> {
 export function postOrder({
   cookie,
   prodList,
-  time
+  time,
+  address
 }: {
   cookie: string
-  prodList: any[]
-  time: {
-    startTime: string
-    endTime: string
-  }
-}): Promise<any> {
-  console.log('提交订单', prodList, time)
+  prodList: ProdList
+  time: ITime
+  address: IAddress
+}): Promise<IRes> {
+  console.log('提交订单', cookie, prodList, time, address)
   function api(): Promise<{
     code: number
     message: string
@@ -255,7 +318,7 @@ export function postOrder({
       } else if (randomNum > 0.4) {
         resolve({ code: -4, message: '商品已售罄' })
       } else if (randomNum > 0.2) {
-        resolve({ code: -5, message: '配送时间已约满' })
+        resolve({ code: -5, message: '选择的时间配送已约满，请重新选择' })
       } else {
         // success
         resolve({
@@ -268,7 +331,7 @@ export function postOrder({
   return api().then((res) => {
     const { code, message } = res
     if (code === 0) {
-      return true
+      return res
     }
     return Promise.reject({
       code,

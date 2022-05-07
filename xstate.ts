@@ -1,5 +1,5 @@
 import { assign, createMachine, interpret, send } from 'xstate'
-import type { IConfig } from './service'
+import type { IConfig, IAddress, ITime, ProdList } from './service'
 import { getAddress, getCart, getConfig, getDeliveryTime, postOrder } from './service'
 
 interface Context {
@@ -7,26 +7,15 @@ interface Context {
   /**
    * 地址对象
    */
-  address?: {
-    station_id: string
-    city_number: string
-    location: {
-      location: [number, number]
-    }
-    id: string
-  }
+  address?: IAddress
   /**
    * 购物车数据
    */
-  cartData?: {
-    prodList: any[]
-  }
+  cartData?: ProdList
   /**
    * 配送时间
    */
-  deliveryTime?: {
-    timeList: { startTime: string; endTime: string }[]
-  }
+  deliveryTime?: ITime[]
 }
 
 type FetchEvent =
@@ -231,8 +220,9 @@ const mainMachine = createMachine<Context, FetchEvent>(
               src: (context) => {
                 return postOrder({
                   cookie: context.config.cookie,
-                  prodList: context.cartData?.prodList!,
-                  time: context.deliveryTime?.timeList[0]!
+                  prodList: context.cartData!,
+                  time: context.deliveryTime![0],
+                  address: context.address!
                 }).catch((err) => {
                   console.log(err)
                   return Promise.reject(err)
@@ -259,7 +249,7 @@ const mainMachine = createMachine<Context, FetchEvent>(
                 },
                 {
                   target: 'retryAnotherTime',
-                  // 配送时间已约满
+                  // 选择的时间配送已约满，请重新选择
                   cond: 'isTimeFull',
                   actions: 'filterTimeList'
                 }
@@ -323,11 +313,11 @@ const mainMachine = createMachine<Context, FetchEvent>(
       isProdListEmpty: (_, event: any) => event.data.code === -4,
       isTimeFull: (_, event: any) => event.data.code === -5,
       isTimeListEmpty: (context) => {
-        return context.deliveryTime!.timeList?.length === 0
+        return context.deliveryTime?.length === 0
       },
       // 存在时间段可用
       isTimeListExist: (context) => {
-        return context.deliveryTime!.timeList?.length > 0
+        return context.deliveryTime!?.length > 0
       }
     },
     actions: {
@@ -336,22 +326,20 @@ const mainMachine = createMachine<Context, FetchEvent>(
         return { config: event.data }
       }),
       setAddress: assign((_, event: any) => {
-        console.log(`拿到地址数据: ${JSON.stringify(event.data)}`)
-        return { address: event.data }
+        console.log(`拿到地址数据: ${JSON.stringify(event.data.data)}`)
+        return { address: event.data.data }
       }),
       setCartData: assign((_, event: any) => {
-        console.log(`拿到购物车数据: ${JSON.stringify(event.data)}`)
-        return { cartData: event.data }
+        console.log(`拿到购物车数据: ${JSON.stringify(event.data.data)}`)
+        return { cartData: event.data.data }
       }),
       setDeliveryTime: assign((_, event: any) => {
-        console.log(`拿到配送时间数据: ${JSON.stringify(event.data)}`)
-        return { deliveryTime: event.data }
+        console.log(`拿到配送时间数据: ${JSON.stringify(event.data.data)}`)
+        return { deliveryTime: event.data.data }
       }),
       filterTimeList: assign((context) => {
         return {
-          deliveryTime: {
-            timeList: context.deliveryTime!.timeList.filter((time) => time !== context.deliveryTime!.timeList[0])
-          }
+          deliveryTime: context.deliveryTime!.slice(1)
         }
       })
     }

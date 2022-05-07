@@ -30,6 +30,10 @@ module.exports = {
         // ignore: [/.d.ts$/i]
       }
     ],
-    'prefer-promise-reject-errors': 'off'
+    'prefer-promise-reject-errors': 'off',
+    "rxjs/no-implicit-any-catch": [
+      "error",
+      { "allowExplicitAny": true }
+    ]
   }
 }
