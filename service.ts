@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { prompt } from 'inquirer'
+import inquirer from 'inquirer'
 import { nanoid } from 'nanoid'
 
 export interface IConfig {
@@ -35,7 +35,7 @@ export function getConfig(): Promise<IConfig> {
   //   message: '获取config失败'
   // })
 
-  return prompt([
+  return inquirer.prompt([
     {
       type: 'input',
       name: 'cookie',
@@ -122,17 +122,19 @@ export function getAddress({ cookie }: { cookie: string }): Promise<IRes<IAddres
         // 一个地址时不需要选择
         return { data: data?.valid_address[0], code, message }
       }
-      return prompt({
-        type: 'list',
-        name: 'address',
-        message: '请选择地址',
-        choices: data!.valid_address.map((info) => ({
-          value: info,
-          name: `${info.location.address} ${info.location.name} ${info.addr_detail}`
-        }))
-      }).then((res1) => {
-        return { data: res1, code, message }
-      })
+      return inquirer
+        .prompt({
+          type: 'list',
+          name: 'address',
+          message: '请选择地址',
+          choices: data!.valid_address.map((info) => ({
+            value: info,
+            name: `${info.location.address} ${info.location.name} ${info.addr_detail}`
+          }))
+        })
+        .then((res1) => {
+          return { data: res1, code, message }
+        })
     }
     return Promise.reject({
       code: code === 0 ? -3 : code,

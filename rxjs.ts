@@ -18,8 +18,8 @@ import {
   throwError,
   timer
 } from 'rxjs'
-import type { IConfig, ITime } from './service'
-import { getAddress, getCart, getConfig, getDeliveryTime, postOrder } from './service'
+import type { IConfig, ITime } from './service.js'
+import { getAddress, getCart, getConfig, getDeliveryTime, postOrder } from './service.js'
 
 const start$$ = new Subject()
 const getCart$$ = new ReplaySubject<IConfig>(1)
