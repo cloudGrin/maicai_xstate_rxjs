@@ -7,9 +7,7 @@ import {
   from,
   iif,
   map,
-  mergeMap,
   mergeWith,
-  of,
   ReplaySubject,
   retry,
   Subject,
@@ -44,15 +42,14 @@ const address$ = config$.pipe(
           }
         }),
         retry({
-          delay: (error) =>
-            iif(
+          delay: (error) => {
+            console.log('getAddress error', error.message)
+            return iif(
               () => error.code === -2,
-              of('').pipe(
-                tap(() => console.log('getAddress retry')),
-                mergeMap(() => timer(1000))
-              ),
+              timer(1000).pipe(tap(() => console.log('getAddress retry'))),
               throwError(() => error)
             )
+          }
         }),
         catchError((err: unknown) => {
           console.log('getAddress error', err)
@@ -69,19 +66,18 @@ const address$ = config$.pipe(
 )
 
 const cart$ = getCart$$.pipe(
-  mergeMap((config) =>
+  switchMap((config) =>
     from(defer(() => getCart({ cookie: config.cookie }))).pipe(
       map(({ data }) => data),
       retry({
-        delay: (error) =>
-          iif(
+        delay: (error) => {
+          console.log('getCart error', error.message)
+          return iif(
             () => error.code === -2,
-            of('').pipe(
-              tap(() => console.log('getCart retry')),
-              mergeMap(() => timer(1000))
-            ),
+            timer(1000).pipe(tap(() => console.log('getCart retry'))),
             throwError(() => error)
           )
+        }
       }),
       catchError((err: unknown) => {
         console.log('getCart error', err)
@@ -98,28 +94,28 @@ const deliveryTime$ = getDeliveryTime$$.pipe(
     from(defer(() => getDeliveryTime({ cookie: config.cookie }))).pipe(
       map(({ data }) => data),
       retry({
-        delay: (error) =>
-          iif(
+        delay: (error) => {
+          console.log('getDeliveryTime error', error.message)
+          return iif(
             () => error.code === -2,
-            of('').pipe(
-              tap(() => console.log('getDeliveryTime retry')),
-              mergeMap(() => timer(1000))
-            ),
+            timer(1000).pipe(tap(() => console.log('getDeliveryTime retry'))),
             throwError(() => error)
           )
+        }
       }),
       catchError((err: unknown) => {
         console.log('getDeliveryTime error', err)
         return throwError(() => err)
       })
     )
-  ),
-  mergeWith(tryAnotherTime$$)
+  )
 )
+
+const deliveryTimeAndTryAnotherTime$ = deliveryTime$.pipe(mergeWith(tryAnotherTime$$))
 
 const order$ = address$.pipe(
   switchMap(({ config, address }) =>
-    combineLatest([cart$, deliveryTime$]).pipe(
+    combineLatest([cart$, deliveryTimeAndTryAnotherTime$]).pipe(
       map(([prodList, deliveryTime]) => {
         return {
           prodList,
@@ -133,15 +129,14 @@ const order$ = address$.pipe(
           )
         ).pipe(
           retry({
-            delay: (error) =>
-              iif(
+            delay: (error) => {
+              console.log('postOrder error', error.message)
+              return iif(
                 () => error.code === -2,
-                of('').pipe(
-                  tap(() => console.log('postOrder retry')),
-                  mergeMap(() => timer(1000))
-                ),
+                timer(1000).pipe(tap(() => console.log('postOrder retry'))),
                 throwError(() => error)
               )
+            }
           }),
           catchError((err: any) => {
             if (err.code === -4) {
